@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../config/multer");
-const Suggestion = require("../models/Suggestion");
+const upload = require("../multer");
+const Suggestion = require("../Suggestion");
 
 // Upload image
 router.post("/upload", upload.single("image"), async (req, res) => {
