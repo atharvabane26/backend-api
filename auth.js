@@ -4,6 +4,10 @@ const User = require('./User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+router.get("/test", (req, res) => {
+  res.send("auth route working");
+});
+
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
