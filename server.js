@@ -17,10 +17,12 @@ app.get("/", (req, res) => {
   res.send("API working");
 });
 
+app.get("/api/auth/test", (req, res) => {
+  res.send("DIRECT AUTH TEST WORKING");
+});
+
 const authRoutes = require("./auth.js");
-
 console.log("AUTH ROUTES LOADED");
-
 app.use("/api/auth", authRoutes);
 
 
