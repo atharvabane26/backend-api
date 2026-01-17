@@ -1,29 +1,33 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const User = require('./User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const User = require("./User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-router.get("/test", (req, res) => {
-  res.send("auth route working");
-});
-
-// REGISTER
+/* ================= REGISTER ================= */
 router.post("/register", async (req, res) => {
   try {
-    console.log("REGISTER BODY:", req.body);
-
     const { name, username, email, password } = req.body;
 
     if (!name || !username || !email || !password) {
       return res.status(400).json({ message: "All fields required" });
     }
 
+    // check existing user
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    // hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = new User({
       name,
       username,
       email,
-      password
+      password: hashedPassword
     });
 
     const savedUser = await user.save();
@@ -39,25 +43,36 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// LOGIN
+/* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
   try {
-    console.log("LOGIN BODY:", req.body);
-
     const { username, password } = req.body;
 
-    const user = await User.findOne({ username });
+    if (!username || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
 
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
-    if (user.password !== password) {
+    // compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(400).json({ message: "Wrong password" });
     }
 
+    // create token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.status(200).json({
       message: "Login successful",
+      token: token,
       userId: user._id
     });
 
@@ -67,15 +82,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-// GET PROFILE BY USER ID
+/* ================= PROFILE ================= */
 router.get("/profile/:id", async (req, res) => {
   try {
-    const userId = req.params.id;
-
-    const user = await User.findById(userId).select(
-      "name username email"
-    );
+    const user = await User.findById(req.params.id)
+      .select("name username email");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -87,6 +98,5 @@ router.get("/profile/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 module.exports = router;
