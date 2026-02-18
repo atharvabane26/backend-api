@@ -1,36 +1,56 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("./multer");
 const CommunityDesign = require("./communityModel");
 
 
-// 🔥 POST - Admin uploads design
-router.post("/", async (req, res) => {
-  try {
-    const { designerName, imageUrl, caption } = req.body;
+// 🔥 ADMIN IMAGE + DATA UPLOAD
+router.post(
+  "/upload",
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      console.log("BODY:", req.body);
+      console.log("FILE:", req.file);
 
-    const newDesign = new CommunityDesign({
-      designerName,
-      imageUrl,
-      caption
-    });
+      if (!req.file) {
+        return res.status(400).json({
+          error: "No image uploaded. Field name must be 'image'"
+        });
+      }
 
-    await newDesign.save();
+      const community = new CommunityDesign({
+        designerName: req.body.designerName,
+        caption: req.body.caption,
+        imageUrl: req.file.path
+      });
 
-    res.status(201).json(newDesign);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      await community.save();
+
+      res.status(201).json({
+        message: "Community design uploaded successfully",
+        data: community
+      });
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: "Upload failed",
+        details: err.message
+      });
+    }
   }
-});
+);
 
 
-// 🔥 GET - Unity app fetches data
+// 🔥 FETCH ALL COMMUNITY DESIGNS (Unity use this)
 router.get("/", async (req, res) => {
   try {
-    const designs = await CommunityDesign
+    const data = await CommunityDesign
       .find()
       .sort({ createdAt: -1 });
 
-    res.json(designs);
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
