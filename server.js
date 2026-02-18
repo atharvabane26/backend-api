@@ -31,6 +31,10 @@ app.use("/api/auth", authRoutes);
 const suggestionRoutes = require("./suggestions");
 app.use("/api/designs", suggestionRoutes);
 
+//this will save the project
+const designProjectRoutes = require("./designProjects");
+app.use("/api/design-projects", designProjectRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
