@@ -35,6 +35,10 @@ app.use("/api/designs", suggestionRoutes);
 const designProjectRoutes = require("./designProjects");
 app.use("/api/design-projects", designProjectRoutes);
 
+// 🔥 Community Designs Routes
+const communityRoutes = require("./communityRoutes");
+app.use("/api/community", communityRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
