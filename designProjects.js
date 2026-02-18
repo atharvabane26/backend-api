@@ -29,12 +29,17 @@ router.post("/save", async (req, res) => {
 
 router.get("/all", async (req, res) => {
   try {
-    const projects = await SavedDesignProject.find().sort({ createdAt: -1 });
+    const projects = await SavedDesignProject
+      .find()
+      .sort({ createdAt: -1 }); // latest first
+
     res.json(projects);
+
   } catch (err) {
-    res.status(500).json({ message: "Error fetching projects" });
+    res.status(500).json({
+      message: "Error fetching projects"
+    });
   }
 });
-
 
 module.exports = router;
