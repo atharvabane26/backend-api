@@ -8,7 +8,7 @@ const savedDesignProjectSchema = new mongoose.Schema({
   selectedWall: {
     type: String,
     required: true,
-    enum: ["Wall 1", "Wall 2", "Wall 3"]
+    enum: ["Wall1", "Wall2", "Wall3"]
   },
   createdAt: {
     type: Date,
