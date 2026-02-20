@@ -2,11 +2,20 @@ const express = require("express");
 const router = express.Router();
 const SavedDesignProject = require("./SavedDesignProject");
 
+// Save project with userId
 router.post("/save", async (req, res) => {
   try {
-    const { projectName, selectedWall } = req.body;
+    const { projectName, selectedWall, userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required"
+      });
+    }
 
     const newProject = new SavedDesignProject({
+      userId,
       projectName,
       selectedWall
     });
@@ -27,11 +36,12 @@ router.post("/save", async (req, res) => {
   }
 });
 
-router.get("/all", async (req, res) => {
+// Get only projects belonging to this user
+router.get("/user/:userId", async (req, res) => {
   try {
     const projects = await SavedDesignProject
-      .find()
-      .sort({ createdAt: -1 }); // latest first
+      .find({ userId: req.params.userId })
+      .sort({ createdAt: -1 });
 
     res.json(projects);
 
